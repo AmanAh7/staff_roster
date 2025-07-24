@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>{{ staff.name }}'s Weekly Shifts</title>
+  </head>
+  <body>
+    <h2>Shifts for {{ staff.name }} ({{ start }} to {{ end }})</h2>
+    {% if shifts %}
+    <ul>
+      {% for shift in shifts %}
+      <li>
+        <strong>{{ shift.date }}:</strong> {{ shift.start_time }} to {{
+        shift.end_time }}
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p>No shifts assigned for this week.</p>
+    {% endif %}
+    <br />
+    <a href="{{ url_for('dashboard') }}">← Back to Dashboard</a>
+  </body>
+</html>

@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>View Shifts</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+      }
+      h2 {
+        color: #333;
+      }
+      label {
+        display: block;
+        margin: 5px 0;
+      }
+      input[type="date"],
+      input[type="submit"] {
+        padding: 6px;
+        margin: 8px 0;
+        display: block;
+      }
+      .submit-btn {
+        background-color: #007bff;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+      .submit-btn:hover {
+        background-color: #0056b3;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+      }
+      th,
+      td {
+        border: 1px solid #999;
+        padding: 10px;
+        text-align: center;
+      }
+      th {
+        background-color: #f2f2f2;
+      }
+      .back-link {
+        margin-top: 20px;
+        display: inline-block;
+        text-decoration: none;
+        color: #007bff;
+      }
+      .back-link:hover {
+        text-decoration: underline;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>📋 View Shifts</h2>
+
+    <form method="POST">
+      <label><strong>Select Staff (Optional):</strong></label>
+      {% if staff_list %} {% for staff in staff_list %}
+      <label>
+        <input
+          type="checkbox"
+          name="staff_ids"
+          value="{{ staff[0] }}"
+          {%
+          if
+          staff[0]|string
+          in
+          selected_ids
+          %}checked{%
+          endif
+          %}
+        />
+        {{ staff[1] }}
+      </label>
+      {% endfor %} {% else %}
+      <p style="color: red">⚠️ No staff found in database.</p>
+      {% endif %}
+
+      <br />
+
+      <label><strong>Start Date:</strong></label>
+      <input type="date" name="start_date" value="{{ start_date }}" required />
+
+      <label><strong>End Date:</strong></label>
+      <input type="date" name="end_date" value="{{ end_date }}" required />
+
+      <input class="submit-btn" type="submit" value="🔍 View Shifts" />
+    </form>
+
+    {% if shifts is not none %}
+    <h3>Shifts</h3>
+
+    {% if shifts %}
+    <!-- ✅ Export Excel Button (only once) -->
+    <form method="POST" action="{{ url_for('export_shifts') }}">
+      {% for id in selected_ids %}
+      <input type="hidden" name="staff_ids" value="{{ id }}" />
+      {% endfor %}
+      <input type="hidden" name="start_date" value="{{ start_date }}" />
+      <input type="hidden" name="end_date" value="{{ end_date }}" />
+      <button type="submit" style="background-color: green; color: white">
+        ⬇️ Export Excel
+      </button>
+    </form>
+
+    <table>
+      <tr>
+        <th>Staff Name</th>
+        <th>Date</th>
+        <th>Start Time</th>
+        <th>End Time</th>
+        <th>Action</th>
+      </tr>
+      {% for shift in shifts %}
+      <tr>
+        <td>{{ shift[0] }}</td>
+        <td>{{ shift[1] }}</td>
+        <td>{{ shift[2] }}</td>
+        <td>{{ shift[3] }}</td>
+        <td>
+          <!-- Delete -->
+          <form
+            action="{{ url_for('delete_shift', shift_id=shift[5]) }}"
+            method="POST"
+            style="display: inline"
+            onsubmit="return confirm('Delete shift for {{ shift[0] }} on {{ shift[1] }}?')"
+          >
+            <input type="hidden" name="start_date" value="{{ start_date }}" />
+            <input type="hidden" name="end_date" value="{{ end_date }}" />
+            {% for id in selected_ids %}
+            <input type="hidden" name="staff_ids" value="{{ id }}" />
+            {% endfor %}
+            <button type="submit" style="background-color: red; color: white">
+              🗑️
+            </button>
+          </form>
+
+          <!-- Edit -->
+          <a href="{{ url_for('edit_shift', shift_id=shift[5]) }}">
+            <button type="button" style="background-color: orange">✏️</button>
+          </a>
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+    {% else %}
+    <p>No shifts found for the selected criteria.</p>
+    {% endif %} {% endif %}
+
+    <a class="back-link" href="/">← Back to Dashboard</a>
+  </body>
+</html>

@@ -1,0 +1,22 @@
+{% extends "base.html" %} {% block content %}
+<h2>{{ unavailable }} is unavailable for the selected shift.</h2>
+
+{% if replacements %}
+<h3>Recommended Replacements:</h3>
+<table>
+  <tr>
+    <th>Name</th>
+  </tr>
+  {% for r in replacements %}
+  <tr>
+    <td>{{ r[1] }}</td>
+  </tr>
+  {% endfor %}
+</table>
+{% else %}
+<p>No suitable replacements found.</p>
+{% endif %}
+
+<br />
+<a href="{{ url_for('assign_shift') }}">Go Back to Assign Shift</a>
+{% endblock %}

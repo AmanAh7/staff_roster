@@ -1,0 +1,1 @@
+web: gunicorn STAFF_MAN.app:app

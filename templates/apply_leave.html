@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Apply Leave</title>
+  </head>
+  <body>
+    <h2>Apply Leave</h2>
+    <form method="post">
+      <label>Staff:</label>
+      <select name="staff_id" required>
+        {% for s in staff %}
+        <option value="{{ s[0] }}">{{ s[1] }}</option>
+        {% endfor %}</select
+      ><br /><br />
+
+      <label>Date of Leave:</label>
+      <input type="date" name="date" required /><br /><br />
+
+      <input type="submit" value="Apply Leave" />
+    </form>
+    <br />
+    <a href="/">← Back to Dashboard</a>
+  </body>
+</html>

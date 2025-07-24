@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Show Leaves</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+      }
+
+      select,
+      button {
+        margin-top: 10px;
+        padding: 6px;
+      }
+
+      ul {
+        margin-top: 15px;
+        padding-left: 20px;
+      }
+
+      .export-btn {
+        margin-top: 15px;
+        background-color: green;
+        color: white;
+        padding: 6px 12px;
+        border: none;
+        cursor: pointer;
+      }
+
+      a {
+        display: inline-block;
+        margin-top: 20px;
+        color: #007bff;
+        text-decoration: none;
+      }
+
+      a:hover {
+        text-decoration: underline;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>📋 Show Staff Leaves</h2>
+
+    <form method="POST">
+      <label>Select Staff:</label>
+      <select name="staff_id" required>
+        <option value="" disabled {% if not selected_staff %}selected{% endif %}>Select staff</option>
+        {% for staff in staff_list %}
+        <option value="{{ staff[0] }}" {% if staff[0]|string == selected_staff|string %}selected{% endif %}>
+          {{ staff[1] }}
+        </option>
+        {% endfor %}
+      </select>
+      <button type="submit">Show Leaves</button>
+    </form>
+
+    {% if staff_name %}
+      <h3>Leaves for {{ staff_name }}</h3>
+      {% if leave_records %}
+        <ul>
+          {% for leave in leave_records %}
+            <li>{{ leave[0] }}</li>
+          {% endfor %}
+        </ul>
+
+        <!-- Monthly Leave Count Summary -->
+        <h4>🗓️ Monthly Summary</h4>
+        <ul>
+          {% for month, count in leave_summary.items() %}
+            <li>{{ month }}: {{ count }} leave{{ "s" if count > 1 else "" }}</li>
+          {% endfor %}
+        </ul>
+
+        <form method="POST" action="{{ url_for('export_leaves') }}">
+          <input type="hidden" name="staff_id" value="{{ selected_staff }}">
+          <button type="submit" class="export-btn">⬇️ Export Leaves Excel</button>
+        </form>
+      {% else %}
+        <p>No leaves found.</p>
+      {% endif %}
+    {% endif %}
+
+    <a href="{{ url_for('dashboard') }}">← Back to Dashboard</a>
+  </body>
+</html>

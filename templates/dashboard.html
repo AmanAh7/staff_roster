@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Staff Dashboard</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+      }
+
+      h1 {
+        margin-bottom: 30px;
+      }
+
+      .clock-container {
+        position: absolute;
+        top: 10px;
+        right: 20px;
+        font-size: 16px;
+        font-family: monospace;
+        text-align: right;
+      }
+
+      button {
+        padding: 6px 12px;
+        margin: 4px;
+        cursor: pointer;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+      }
+
+      th,
+      td {
+        border: 1px solid #ccc;
+        padding: 10px;
+        text-align: center;
+      }
+
+      th {
+        background-color: #f2f2f2;
+      }
+
+      form {
+        display: inline-block;
+      }
+
+      .button-row {
+        display: flex;
+        gap: 10px;
+        margin-top: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Staff Dashboard</h1>
+
+    {% with messages = get_flashed_messages(with_categories=true) %} {% if
+    messages %}
+    <div style="margin-bottom: 20px">
+      {% for category, message in messages %} {% set alert_class = 'alert-info'
+      %} {% if category == 'danger' %}{% set alert_class = 'alert-danger' %}{%
+      endif %} {% if category == 'warning' %}{% set alert_class =
+      'alert-warning' %}{% endif %} {% if category == 'success' %}{% set
+      alert_class = 'alert-success' %}{% endif %}
+      <div class="alert {{ alert_class }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+    {% endif %} {% endwith %}
+
+    <style>
+      .alert {
+        padding: 10px;
+        border-radius: 5px;
+        margin-bottom: 8px;
+        color: white;
+      }
+      .alert-danger {
+        background-color: #d9534f;
+      }
+      .alert-warning {
+        background-color: #f0ad4e;
+        color: #222;
+      }
+      .alert-success {
+        background-color: #5cb85c;
+      }
+      .alert-info {
+        background-color: #5bc0de;
+      }
+    </style>
+
+    <div class="clock-container">
+      <div id="clock"></div>
+      <div id="date"></div>
+    </div>
+
+    <div>
+      <a href="/add-staff"><button>Add Staff</button></a>
+      <a href="/assign-shift"><button>Assign Shift</button></a>
+      <a href="/view-shift-form"><button>📊 View Shifts</button></a>
+      <a href="/show-leaves-form"><button>📋 Show Leaves</button></a>
+    </div>
+
+    <form action="/clear-shifts-today" method="POST" style="margin-top: 10px">
+      <button type="submit">🧹 Clear Today’s Shifts</button>
+    </form>
+
+    <hr />
+
+    <table>
+      <tr>
+        <th>Select</th>
+        <th>Name</th>
+        <th>Position</th>
+        <th>Leaves (This Month)</th>
+        <th>Night Shifts (This Month)</th>
+        <th>Shifts</th>
+        <th>Apply Leave</th>
+        <th>Change Position</th>
+      </tr>
+
+      {% for s in staff %}
+      <tr>
+        <td>
+          <form action="/delete-staff" method="POST">
+            <input type="hidden" name="staff_ids[]" value="{{ s.id }}" />
+            <button
+              type="submit"
+              style="
+                background-color: rgb(230, 113, 113);
+                color: white;
+                border-radius: 20px;
+              "
+              onclick="return confirm('Delete {{ s.name }}?')"
+            >
+              🗑️
+            </button>
+          </form>
+        </td>
+        <td>{{ s.name }}</td>
+        <td>{{ s.position }}</td>
+        <td>{{ s.total_leaves }}</td>
+        <td>
+          {{ s.total_night_shifts }}
+          <form
+            action="{{ url_for('clear_individual_night_shifts', staff_id=s.id) }}"
+            method="POST"
+            style="display: inline-block; margin-top: 5px"
+          >
+            <button type="submit">Clear</button>
+          </form>
+        </td>
+        <td>
+          {% for shift in shift_data[s.id] %}
+          <div>
+            📅 {{ shift.date }} | ⏰ {{ shift.start_time }} - {{ shift.end_time
+            }}
+          </div>
+          {% else %}
+          <i>No Shifts</i>
+          {% endfor %}
+
+          <form
+            action="{{ url_for('show_weekly_shifts', staff_id=s.id) }}"
+            method="get"
+          >
+            <button type="submit" style="margin-top: 5px">
+              📆 Show shifts
+            </button>
+          </form>
+        </td>
+        <td>
+          <form action="/apply-leave/{{ s.id }}" method="POST">
+            <input type="date" name="date" required />
+            <input type="submit" value="Apply" />
+          </form>
+        </td>
+        <td>
+          <a href="{{ url_for('edit_position', staff_id=s.id) }}">
+            <button type="button">Change</button>
+          </a>
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+
+    <div class="button-row">
+      <form action="/clear-leaves" method="POST">
+        <button type="submit" style="background-color: crimson; color: white">
+          🔄 Clear All Leaves
+        </button>
+      </form>
+
+      <form action="/clear-night-shifts" method="POST">
+        <button type="submit" style="background-color: navy; color: white">
+          🌙 Clear All Night Shifts
+        </button>
+      </form>
+    </div>
+
+    <script>
+      function updateClock() {
+        const now = new Date();
+        const time = now.toLocaleTimeString("en-IN", {
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+          hour12: true,
+        });
+
+        const date = now.toLocaleDateString("en-IN", {
+          weekday: "short",
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+        });
+
+        document.getElementById("clock").textContent = time;
+        document.getElementById("date").textContent = date;
+      }
+
+      setInterval(updateClock, 1000);
+      updateClock();
+    </script>
+  </body>
+</html>

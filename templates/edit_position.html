@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Edit Position</title>
+  </head>
+  <body>
+    <h2>Edit Position for {{ staff[1] }}</h2>
+    <form method="POST">
+      <label>New Position:</label>
+      <input type="text" name="position" value="{{ staff[2] }}" required />
+      <button type="submit">Update</button>
+    </form>
+    <a href="{{ url_for('dashboard') }}">Back to Dashboard</a>
+  </body>
+</html>

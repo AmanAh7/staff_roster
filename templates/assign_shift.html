@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Assign Shift</title>
+    <style>
+      .entry-group {
+        margin-bottom: 10px;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        background: #f9f9f9;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Assign Shifts to Staff (Multiple Dates)</h2>
+
+    <form method="post">
+      <label>Staff:</label>
+      <select name="staff_id" required>
+        {% for s in staff %}
+        <option value="{{ s[0] }}">{{ s[1] }}</option>
+        {% endfor %}
+      </select>
+      <br /><br />
+
+      <div id="shift-entries">
+        <div class="entry-group">
+          <label>Date:</label>
+          <input type="date" name="date[]" required />
+
+          <label>Start Time:</label>
+          <input type="time" name="start_time[]" required />
+
+          <label>End Time:</label>
+          <input type="time" name="end_time[]" required />
+        </div>
+      </div>
+
+      <button type="button" onclick="addShiftEntry()">
+        ➕ Add Another Shift
+      </button>
+      <br /><br />
+      <input type="submit" value="Assign Shifts" />
+    </form>
+
+    <br />
+    <a href="/">← Back to Dashboard</a>
+
+    <script>
+      function addShiftEntry() {
+        const container = document.getElementById("shift-entries");
+        const newEntry = document.createElement("div");
+        newEntry.classList.add("entry-group");
+
+        newEntry.innerHTML = `
+        <label>Date:</label>
+        <input type="date" name="date[]" required />
+
+        <label>Start Time:</label>
+        <input type="time" name="start_time[]" required />
+
+        <label>End Time:</label>
+        <input type="time" name="end_time[]" required />
+        <button type="button" onclick="this.parentElement.remove()">❌ Remove</button>
+      `;
+
+        container.appendChild(newEntry);
+      }
+    </script>
+  </body>
+</html>
