@@ -6,7 +6,11 @@ from urllib.parse import urlencode
 from openpyxl import Workbook
 from io import BytesIO
 from collections import defaultdict
+from dotenv import load_dotenv
+import os
 
+load_dotenv()
+    
 app = Flask(__name__)
 app.config.from_pyfile('config.py')
 app.secret_key = 'abcd1234'

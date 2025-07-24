@@ -1,4 +1,5 @@
-MYSQL_HOST = 'localhost'
-MYSQL_USER = 'root'
-MYSQL_PASSWORD = 'Aman@7477'  
-MYSQL_DB = 'staff_db'
+import os 
+MYSQL_HOST = os.getenv('MYSQL_HOST')
+MYSQL_USER = os.getenv('MYSQL_USER')
+MYSQL_PASSWORD = os.getenv('MYSQL_PASSWORD') 
+MYSQL_DB = os.getenv('MYSQL_DB')
