@@ -1,23 +1,34 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='weekly_shifts.css') }}"
+    />
     <title>{{ staff.name }}'s Weekly Shifts</title>
   </head>
   <body>
-    <h2>Shifts for {{ staff.name }} ({{ start }} to {{ end }})</h2>
-    {% if shifts %}
-    <ul>
-      {% for shift in shifts %}
-      <li>
-        <strong>{{ shift.date }}:</strong> {{ shift.start_time }} to {{
-        shift.end_time }}
-      </li>
-      {% endfor %}
-    </ul>
-    {% else %}
-    <p>No shifts assigned for this week.</p>
-    {% endif %}
-    <br />
-    <a href="{{ url_for('dashboard') }}">← Back to Dashboard</a>
+    <div class="container">
+      <h2>Shifts for {{ staff.name }} ({{ start }} to {{ end }})</h2>
+
+      {% if shifts %}
+      <div class="shift-cards">
+        {% for shift in shifts %}
+        <div class="shift-card">
+          <div class="shift-date">{{ shift.date }}</div>
+          <div class="shift-time">
+            ⏰ {{ shift.start_time }} - {{ shift.end_time }}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <p class="no-shifts">No shifts assigned for this week.</p>
+      {% endif %}
+
+      <a href="{{ url_for('dashboard') }}" class="back-link"
+        >← Back to Dashboard</a
+      >
+    </div>
   </body>
 </html>

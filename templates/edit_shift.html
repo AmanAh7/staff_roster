@@ -1,43 +1,54 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <meta charset="UTF-8" />
     <title>Edit Shift</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='edit_shift.css') }}"
+    />
   </head>
   <body>
-    <h2>Edit Shift for {{ shift[1] }} on {{ shift[2] }}</h2>
+    <div class="edit-container">
+      <h2>Edit Shift for {{ shift[1] }} on {{ shift[2] }}</h2>
 
-    <form method="POST">
-      <label>Start Time:</label>
-      <input
-        type="time"
-        name="start_time"
-        value="{{ shift[3] }}"
-        required
-      /><br /><br />
+      <form
+        method="POST"
+        action="{{ url_for('edit_shift', shift_id=shift[0]) }}"
+      >
+        <div class="form-group">
+          <label>Start Time:</label>
+          <input
+            type="time"
+            name="start_time"
+            value="{{ shift[3] }}"
+            required
+          />
+        </div>
 
-      <label>End Time:</label>
-      <input
-        type="time"
-        name="end_time"
-        value="{{ shift[4] }}"
-        required
-      /><br /><br />
+        <div class="form-group">
+          <label>End Time:</label>
+          <input type="time" name="end_time" value="{{ shift[4] }}" required />
+        </div>
 
-      <!-- Preserve filters for redirect -->
-      <input type="hidden" name="start_date" value="{{ start_date }}" />
-      <input type="hidden" name="end_date" value="{{ end_date }}" />
-      {% for id in staff_ids %}
-      <input type="hidden" name="staff_ids" value="{{ id }}" />
-      {% endfor %}
+        <!-- Preserve filters for redirect -->
+        <input type="hidden" name="start_date" value="{{ start_date }}" />
+        <input type="hidden" name="end_date" value="{{ end_date }}" />
+        {% for id in staff_ids %}
+        <input type="hidden" name="staff_ids" value="{{ id }}" />
+        {% endfor %}
 
-      <button type="submit">Update Shift</button>
-    </form>
+        <div class="form-actions">
+          <button type="submit">Update Shift</button>
+        </div>
+      </form>
 
-    <br />
-    <a
-      href="{{ url_for('view_shift_form', start_date=start_date, end_date=end_date, **{'staff_ids': staff_ids}) }}"
-    >
-      ← Back to View Shifts
-    </a>
+      <a
+        href="{{ url_for('assign_shift', start_date=start_date, end_date=end_date, **{'staff_ids': staff_ids}) }}"
+        class="back-link"
+      >
+        ← Back to Assign Shifts
+      </a>
+    </div>
   </body>
 </html>

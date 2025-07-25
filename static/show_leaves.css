@@ -1,0 +1,147 @@
+:root {
+  --primary: #007bff;
+  --success: #28a745;
+  --danger: #dc3545;
+  --bg: #f5f7fa;
+  --text: #212529;
+  --border: #dee2e6;
+  --hover: #eef2f7;
+}
+
+body {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background-color: var(--bg);
+  color: var(--text);
+  margin: 0;
+  padding: 20px;
+}
+
+/* Layout */
+.center-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+/* Card */
+.card {
+  background-color: #fff;
+  border-radius: 8px;
+  padding: 16px 20px;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.06);
+  margin-bottom: 20px;
+  transition: transform 0.2s ease;
+  width: 100%;
+  max-width: 600px;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+}
+
+/* Headings */
+h2,
+h3,
+h4 {
+  color: var(--primary);
+  margin-bottom: 10px;
+}
+
+/* Forms & Lists */
+form,
+ul,
+p {
+  background: white;
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  margin-bottom: 20px;
+  max-width: 600px;
+  width: 100%;
+}
+
+/* Labels and Inputs */
+label {
+  margin-right: 10px;
+  font-weight: 500;
+}
+
+select {
+  padding: 8px;
+  border-radius: 5px;
+  border: 1px solid var(--border);
+  margin-right: 10px;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* Buttons */
+button {
+  padding: 8px 14px;
+  background-color: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: transform 0.2s ease-in-out, background-color 0.2s;
+}
+
+button:hover {
+  transform: scale(1.05);
+  background-color: #0056b3;
+}
+
+.export-btn {
+  background-color: var(--success);
+}
+
+.export-btn:hover {
+  background-color: #218838;
+}
+
+/* List */
+ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+ul li {
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+/* Links */
+a {
+  display: inline-block;
+  margin-top: 10px;
+  text-decoration: none;
+  color: var(--primary);
+  font-weight: bold;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .card,
+  form,
+  ul,
+  p {
+    padding: 14px;
+    box-sizing: border-box;
+  }
+
+  select,
+  button {
+    width: 100%;
+    margin: 10px 0;
+  }
+
+  button {
+    padding: 12px;
+    font-size: 1rem;
+  }
+}

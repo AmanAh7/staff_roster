@@ -64,7 +64,7 @@ def dashboard():
 
 @app.route('/assign-shift', methods=['GET', 'POST'])
 def assign_shift():
-    cur = mysql.connection.cursor()
+    cur = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
 
     if request.method == 'POST':
         staff_id = request.form['staff_id']
@@ -90,35 +90,32 @@ def assign_shift():
 
             # Overlap check
             cur.execute("""
-                SELECT sh.start_time, sh.end_time
-                FROM shifts sh
-                WHERE sh.date = %s AND sh.staff_id = %s
-            """, (date_str, staff_id))
+                SELECT start_time, end_time
+                FROM shifts
+                WHERE staff_id = %s AND date = %s
+            """, (staff_id, date_str))
             overlaps = []
             for existing_start, existing_end in cur.fetchall():
-                existing_start = to_time(existing_start)
-                existing_end = to_time(existing_end)
-                existing_start_dt = datetime.combine(date_obj, existing_start)
-                existing_end_dt = datetime.combine(date_obj, existing_end)
+                existing_start_dt = datetime.combine(date_obj, to_time(existing_start))
+                existing_end_dt = datetime.combine(date_obj, to_time(existing_end))
                 if start_dt < existing_end_dt and end_dt > existing_start_dt:
-                    overlaps.append(f"{existing_start.strftime('%H:%M')} - {existing_end.strftime('%H:%M')}")
+                    overlaps.append(f"{existing_start_dt.time().strftime('%H:%M')} - {existing_end_dt.time().strftime('%H:%M')}")
 
             if overlaps:
-                flash(f"❌ Time Overlapping with existing shift(s): {', '.join(overlaps)} on {date_str}", "danger")
+                flash(f"❌ Overlap on {date_str} with: {', '.join(overlaps)}", "danger")
                 continue
 
-            # Night shift logic
             is_night = is_night_shift(start_str, end_str)
             if is_night:
                 cur.execute("""
-                    SELECT COUNT(*) FROM shifts
+                    SELECT COUNT(*) AS night_count FROM shifts
                     WHERE staff_id = %s AND is_night_shift = 1 AND MONTH(date) = MONTH(CURDATE())
                 """, (staff_id,))
-                if cur.fetchone()[0] >= 8:
-                    flash(f"⚠️ Night shift quota reached for staff {staff_id}.", "warning")
+                result = cur.fetchone()
+                if result['night_count'] >= 8:  
+                    flash(f"⚠️ Night shift limit reached for staff ID {staff_id}.", "warning")
                     continue
 
-            # Insert shift
             cur.execute("""
                 INSERT INTO shifts (staff_id, date, start_time, end_time, is_night_shift)
                 VALUES (%s, %s, %s, %s, %s)
@@ -130,11 +127,36 @@ def assign_shift():
                 """, (staff_id,))
 
         mysql.connection.commit()
-        return redirect(url_for('dashboard'))
+        return redirect(url_for('assign_shift'))
 
+    # GET: load form and weekly shift table
     cur.execute("SELECT id, name FROM staff")
     staff = cur.fetchall()
-    return render_template('assign_shift.html', staff=staff)
+
+    today = datetime.today().date()
+    start_of_week = today - timedelta(days=today.weekday())
+    end_of_week = start_of_week + timedelta(days=6)
+
+    cur.execute("""
+    SELECT sh.id, sh.staff_id, s.name AS staff_name, s.position,
+           sh.date, sh.start_time, sh.end_time
+    FROM shifts sh
+    JOIN staff s ON s.id = sh.staff_id
+    WHERE sh.date BETWEEN %s AND %s
+    ORDER BY sh.date, sh.start_time
+""", (start_of_week, end_of_week))
+
+
+    weekly_shifts = cur.fetchall()
+
+    return render_template(
+        'assign_shift.html',
+        staff=staff,
+        assigned_shifts=weekly_shifts,
+        start_of_week=start_of_week,
+        end_of_week=end_of_week
+    )
+
 
 
 @app.route('/export_leaves', methods=['POST'])
@@ -250,50 +272,50 @@ def staff_available(staff_id, date, start_time, end_time):
     count = cur.fetchone()[0]
     return count == 0
 
-#view shifts
-@app.route('/view-shift-form', methods=['GET', 'POST'])
-def view_shift_form():
-    cur = mysql.connection.cursor()
+# #view shifts
+# @app.route('/view-shift-form', methods=['GET', 'POST'])
+# def view_shift_form():
+#     cur = mysql.connection.cursor()
 
-    cur.execute("SELECT id, name FROM staff")
-    staff_list = cur.fetchall()
+#     cur.execute("SELECT id, name FROM staff")
+#     staff_list = cur.fetchall()
 
-    shifts = []
-    start_date = end_date = ''
-    selected_ids = []
+#     shifts = []
+#     start_date = end_date = ''
+#     selected_ids = []
 
-    if request.method == 'POST':
-        start_date = request.form['start_date']
-        end_date = request.form['end_date']
-        selected_ids = request.form.getlist('staff_ids')
+#     if request.method == 'POST':
+#         start_date = request.form['start_date']
+#         end_date = request.form['end_date']
+#         selected_ids = request.form.getlist('staff_ids')
 
-    elif request.method == 'GET' and 'start_date' in request.args:
-        start_date = request.args['start_date']
-        end_date = request.args['end_date']
-        selected_ids = request.args.getlist('staff_ids')
+#     elif request.method == 'GET' and 'start_date' in request.args:
+#         start_date = request.args['start_date']
+#         end_date = request.args['end_date']
+#         selected_ids = request.args.getlist('staff_ids')
 
-    if start_date and end_date and selected_ids:
-        format_strings = ','.join(['%s'] * len(selected_ids))
-        cur.execute(
-            f"""
-            SELECT s.name, sh.date, sh.start_time, sh.end_time, sh.staff_id, sh.id
-            FROM shifts sh
-            JOIN staff s ON s.id = sh.staff_id
-            WHERE sh.date BETWEEN %s AND %s AND sh.staff_id IN ({format_strings})
-            ORDER BY sh.date, s.name
-            """,
-            [start_date, end_date] + selected_ids
-        )
-        shifts = cur.fetchall()
+#     if start_date and end_date and selected_ids:
+#         format_strings = ','.join(['%s'] * len(selected_ids))
+#         cur.execute(
+#             f"""
+#             SELECT s.name, sh.date, sh.start_time, sh.end_time, sh.staff_id, sh.id
+#             FROM shifts sh
+#             JOIN staff s ON s.id = sh.staff_id
+#             WHERE sh.date BETWEEN %s AND %s AND sh.staff_id IN ({format_strings})
+#             ORDER BY sh.date, s.name
+#             """,
+#             [start_date, end_date] + selected_ids
+#         )
+#         shifts = cur.fetchall()
 
-    return render_template(
-        'view_shift_form.html',
-        staff_list=staff_list,
-        shifts=shifts,
-        start_date=start_date,
-        end_date=end_date,
-        selected_ids=selected_ids
-    )
+#     return render_template(
+#         'view_shift_form.html',
+#         staff_list=staff_list,
+#         shifts=shifts,
+#         start_date=start_date,
+#         end_date=end_date,
+#         selected_ids=selected_ids
+#     )
 
 
 
@@ -301,38 +323,24 @@ def view_shift_form():
 @app.route('/delete-shift/<int:shift_id>', methods=['POST'])
 def delete_shift(shift_id):
     cur = mysql.connection.cursor()
-
     cur.execute("SELECT staff_id, is_night_shift FROM shifts WHERE id = %s", (shift_id,))
     result = cur.fetchone()
     if not result:
-        flash("❌ Shift not found.", "error")
-        return redirect(url_for('view_shift_form'))
+        flash("❌ Shift not found.", "danger")
+        return redirect(url_for('assign_shift'))
 
     staff_id, is_night_shift = result
-
     if is_night_shift:
         cur.execute("""
             UPDATE staff
             SET total_night_shifts = GREATEST(total_night_shifts - 1, 0)
             WHERE id = %s
         """, (staff_id,))
-
     cur.execute("DELETE FROM shifts WHERE id = %s", (shift_id,))
     mysql.connection.commit()
 
-    flash("✅ Shift deleted successfully.", "success")
-
-    # Preserve filters on redirect
-    start_date = request.form.get("start_date")
-    end_date = request.form.get("end_date")
-    staff_ids = request.form.getlist("staff_ids")
-
-    params = {'start_date': start_date, 'end_date': end_date}
-    for staff_id in staff_ids:
-        params.setdefault('staff_ids', []).append(staff_id)
-
-    query = urlencode(params, doseq=True)
-    return redirect(f"/view-shift-form?{query}")
+    flash("✅ Shift deleted.", "success")
+    return redirect(url_for('assign_shift'))
 
 
 
@@ -433,16 +441,24 @@ def edit_shift(shift_id):
     if request.method == 'POST':
         start_time_raw = request.form['start_time']
         end_time_raw = request.form['end_time']
-        start_date = request.form['start_date']
-        end_date = request.form['end_date']
-        staff_ids = request.form.getlist('staff_ids')
 
-        start_time = datetime.strptime(start_time_raw, "%H:%M").time()
-        end_time = datetime.strptime(end_time_raw, "%H:%M").time()
+        def parse_time(value: str) -> time:
+            for fmt in ("%H:%M", "%H:%M:%S"):
+                try:
+                    return datetime.strptime(value, fmt).time()
+                except ValueError:
+                    continue
+            raise ValueError(f"Unrecognized time format: {value}")
+
+        try:
+            start_time = parse_time(start_time_raw)
+            end_time = parse_time(end_time_raw)
+        except ValueError as e:
+            flash(str(e), "danger")
+            return redirect(url_for('assign_shift'))
 
         start_time_str = start_time.strftime("%H:%M:%S")
         end_time_str = end_time.strftime("%H:%M:%S")
-
         is_night = is_night_shift(start_time_str, end_time_str)
 
         cur.execute("""
@@ -450,14 +466,31 @@ def edit_shift(shift_id):
             SET start_time = %s, end_time = %s, is_night_shift = %s 
             WHERE id = %s
         """, (start_time_str, end_time_str, int(is_night), shift_id))
-
         mysql.connection.commit()
 
-        params = {'start_date': start_date, 'end_date': end_date}
-        for staff_id in staff_ids:
-            params.setdefault('staff_ids', []).append(staff_id)
+        flash("✅ Shift updated successfully.", "success")
+        return redirect(url_for('assign_shift'))
 
-        return redirect(f"/view-shift-form?{urlencode(params, doseq=True)}")
+    # GET: load shift info
+    cur.execute("""
+        SELECT s.id, st.name, s.date, s.start_time, s.end_time 
+        FROM shifts s
+        JOIN staff st ON st.id = s.staff_id
+        WHERE s.id = %s
+    """, (shift_id,))
+    shift = cur.fetchone()
+
+    return render_template('edit_shift.html', shift=shift)
+
+    cur.execute("""
+        SELECT s.id, st.name, s.date, s.start_time, s.end_time 
+        FROM shifts s
+        JOIN staff st ON st.id = s.staff_id
+        WHERE s.id = %s
+    """, (shift_id,))
+    shift = cur.fetchone()
+
+    return render_template('edit_shift.html', shift=shift)  
 
     # GET: load shift info
     cur.execute("""

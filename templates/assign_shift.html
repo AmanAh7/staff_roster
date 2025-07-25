@@ -2,70 +2,186 @@
 <html>
   <head>
     <title>Assign Shift</title>
-    <style>
-      .entry-group {
-        margin-bottom: 10px;
-        padding: 10px;
-        border: 1px solid #ddd;
-        border-radius: 6px;
-        background: #f9f9f9;
-      }
-    </style>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='assign_shift.css') }}"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   </head>
   <body>
-    <h2>Assign Shifts to Staff (Multiple Dates)</h2>
+    <!-- ✅ Flash Box -->
+    {% with messages = get_flashed_messages(with_categories=true) %} {% if
+    messages %}
+    <div id="flash-wrapper" class="flash-wrapper">
+      {% for category, message in messages %} {{ message }} {% endfor %}
+    </div>
+    {% endif %} {% endwith %}
 
-    <form method="post">
-      <label>Staff:</label>
-      <select name="staff_id" required>
-        {% for s in staff %}
-        <option value="{{ s[0] }}">{{ s[1] }}</option>
-        {% endfor %}
-      </select>
-      <br /><br />
+    <div class="card">
+      <h2>Assign Shifts to Staff (Multiple Dates)</h2>
 
-      <div id="shift-entries">
-        <div class="entry-group">
-          <label>Date:</label>
-          <input type="date" name="date[]" required />
+      <form method="post">
+        <label for="staff">Staff:</label>
+        <select name="staff_id" id="staff" required>
+          <option value="" disabled selected>Select a staff member</option>
+          {% for s in staff %}
+          <option value="{{ s.id }}">{{ s.name }}</option>
+          {% endfor %}
+        </select>
 
-          <label>Start Time:</label>
-          <input type="time" name="start_time[]" required />
+        <fieldset id="shift-entries">
+          <legend>Shift Entries</legend>
+          <div class="entry-group">
+            <div class="entry-field">
+              <label>Date:</label>
+              <input type="date" name="date[]" required />
+            </div>
+            <div class="entry-field">
+              <label>Start Time:</label>
+              <input type="time" name="start_time[]" required />
+            </div>
+            <div class="entry-field">
+              <label>End Time:</label>
+              <input type="time" name="end_time[]" required />
+            </div>
+          </div>
+        </fieldset>
 
-          <label>End Time:</label>
-          <input type="time" name="end_time[]" required />
-        </div>
-      </div>
+        <button class="add-shift-btn" type="button" onclick="addShiftEntry()">
+          ➕ Add Another Shift
+        </button>
+        <input type="submit" value="Assign Shifts" />
+      </form>
+    </div>
 
-      <button type="button" onclick="addShiftEntry()">
-        ➕ Add Another Shift
+    <div class="card">
+      <h2>Weekly Assigned Shifts ({{ start_of_week }} → {{ end_of_week }})</h2>
+
+      <button
+        class="export-btn"
+        onclick="exportTableToExcel()"
+        style="margin-bottom: 10px"
+      >
+        📤 Export to Excel
       </button>
-      <br /><br />
-      <input type="submit" value="Assign Shifts" />
-    </form>
 
-    <br />
-    <a href="/">← Back to Dashboard</a>
+      <table id="shifts-table">
+        <thead>
+          <tr>
+            <th>Staff</th>
+            <th>Position</th>
+            <th>Date</th>
+            <th>Day</th>
+            <th>Start Time</th>
+            <th>End Time</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for shift in assigned_shifts %}
+          <tr>
+            <td>{{ shift.staff_name }}</td>
+            <td>{{ shift.position }}</td>
+            <td>{{ shift.date }}</td>
+            <td>{{ shift.date.strftime('%A') }}</td>
+            <td>{{ shift.start_time }}</td>
+            <td>{{ shift.end_time }}</td>
+            <td>
+              <form
+                method="post"
+                action="{{ url_for('delete_shift', shift_id=shift.id) }}"
+                style="display: inline"
+                class="delete-form"
+              >
+                <button class="delete-btn" type="submit" title="Delete Shift">
+                  🗑
+                </button>
+              </form>
+              <form
+                method="get"
+                action="{{ url_for('edit_shift', shift_id=shift.id) }}"
+                style="display: inline"
+              >
+                <button type="submit" title="Edit Shift">✏</button>
+              </form>
+            </td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="7">No shifts assigned for this week.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <a href="/" class="back-link">← Back to Dashboard</a>
 
     <script>
-      function addShiftEntry() {
-        const container = document.getElementById("shift-entries");
-        const newEntry = document.createElement("div");
-        newEntry.classList.add("entry-group");
-
-        newEntry.innerHTML = `
-        <label>Date:</label>
-        <input type="date" name="date[]" required />
-
-        <label>Start Time:</label>
-        <input type="time" name="start_time[]" required />
-
-        <label>End Time:</label>
-        <input type="time" name="end_time[]" required />
-        <button type="button" onclick="this.parentElement.remove()">❌ Remove</button>
+      const entryTemplate = `
+        <div class="entry-group">
+          <div class="entry-field">
+            <label>Date:</label>
+            <input type="date" name="date[]" required />
+          </div>
+          <div class="entry-field">
+            <label>Start Time:</label>
+            <input type="time" name="start_time[]" required />
+          </div>
+          <div class="entry-field">
+            <label>End Time:</label>
+            <input type="time" name="end_time[]" required />
+          </div>
+          <button type="button" onclick="this.parentElement.remove()">❌ Remove</button>
+        </div>
       `;
 
-        container.appendChild(newEntry);
+      function addShiftEntry() {
+        const container = document.getElementById("shift-entries");
+        const entry = document.createElement("div");
+        entry.innerHTML = entryTemplate;
+        container.appendChild(entry.firstElementChild);
+      }
+
+      function exportTableToExcel() {
+        const table = document.getElementById("shifts-table");
+        const wb = XLSX.utils.table_to_book(table, { sheet: "Shifts" });
+        XLSX.writeFile(wb, "assigned_shifts.xlsx");
+      }
+
+      setTimeout(() => {
+        const flash = document.getElementById("flash-wrapper");
+        if (flash) {
+          flash.style.opacity = 0;
+          setTimeout(() => flash.remove(), 500);
+        }
+      }, 2000);
+
+      document.querySelectorAll(".delete-form").forEach((form) => {
+        form.addEventListener("submit", (e) => {
+          e.preventDefault();
+          showConfirmModal(() => form.submit());
+        });
+      });
+
+      function showConfirmModal(onConfirm) {
+        const modalHTML = `
+      <div class="modal-overlay" id="confirm-modal">
+        <div class="modal">
+          <h3>Delete this shift?</h3>
+          <button class="confirm">Yes, Delete</button>
+          <button class="cancel">Cancel</button>
+        </div>
+      </div>
+    `;
+        document.body.insertAdjacentHTML("beforeend", modalHTML);
+
+        const modal = document.getElementById("confirm-modal");
+        modal.querySelector(".confirm").onclick = () => {
+          modal.remove();
+          onConfirm();
+        };
+        modal.querySelector(".cancel").onclick = () => modal.remove();
       }
     </script>
   </body>

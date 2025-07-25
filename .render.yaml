@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: flask-app
+    runtime: python
+    buildCommand: ""
+    startCommand: gunicorn app:app
+    envVars:
+      - key: FLASK_ENV
+        value: production
+      - key: MYSQL_HOST
+        value: your-mysql-host
+      - key: MYSQL_USER
+        value: your-mysql-user
+      - key: MYSQL_PASSWORD
+        value: your-mysql-password
+      - key: MYSQL_DATABASE
+        value: your-database-name

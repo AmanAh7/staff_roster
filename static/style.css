@@ -1,0 +1,260 @@
+:root {
+  --primary: #007bff;
+  --danger: #dc3545;
+  --warning: #f0ad4e;
+  --success: #28a745;
+  --info: #5bc0de;
+  --light-bg: #f4f6f9;
+  --text: #212529;
+  --border: #dee2e6;
+  --hover-bg: #e9ecef;
+  --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Base */
+body {
+  margin: 0;
+  padding: 20px;
+  font-family: "Inter", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background-color: var(--light-bg);
+  color: var(--text);
+}
+
+h1 {
+  font-size: 2rem;
+  color: var(--primary);
+  margin: 20px 0 24px;
+}
+
+/* Navbar */
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 24px;
+  background-color: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(10px);
+  box-shadow: var(--shadow);
+  border-radius: 0 0 10px 10px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.nav-left h1 {
+  font-size: 1.8rem;
+  margin: 0;
+}
+
+.nav-center {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  align-items: center;
+}
+
+.nav-right {
+  text-align: right;
+  font-family: "Courier New", Courier, monospace;
+  color: var(--primary);
+  min-width: 160px;
+}
+
+.clock-time {
+  font-size: 1.2rem;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+.clock-date {
+  font-size: 0.8rem;
+  color: #555;
+}
+
+/* Alerts */
+.alert {
+  padding: 14px 20px;
+  border-radius: 6px;
+  margin-bottom: 16px;
+  color: #fff;
+  box-shadow: var(--shadow);
+  animation: fadeOut 2s ease 2s forwards;
+}
+.alert-success {
+  background: var(--success);
+}
+.alert-danger {
+  background: var(--danger);
+}
+.alert-warning {
+  background: var(--warning);
+  color: #000;
+}
+.alert-info {
+  background: var(--info);
+}
+
+@keyframes fadeOut {
+  to {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+}
+
+/* Controls */
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+button,
+.btn {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  color: white;
+  background-color: var(--primary);
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+button:hover,
+.btn:hover {
+  transform: scale(1.05);
+  filter: brightness(1.1);
+}
+
+.btn.danger {
+  background-color: var(--danger);
+}
+.btn.warning {
+  background-color: var(--warning);
+  color: #000;
+}
+.btn.success {
+  background-color: var(--success);
+}
+.btn.info {
+  background-color: var(--info);
+}
+
+.apply-btn {
+  padding: 6px 12px;
+  border-radius: 4px;
+  border: none;
+  background-color: var(--primary);
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+.apply-btn:hover {
+  transform: scale(1.05);
+  filter: brightness(1.1);
+}
+
+.inline-form {
+  display: inline;
+}
+
+/* Table */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+
+th,
+td {
+  padding: 14px 12px;
+  border-bottom: 1px solid var(--border);
+  text-align: center;
+}
+
+th {
+  background-color: var(--hover-bg);
+  font-weight: 600;
+}
+
+tr:hover td {
+  background-color: var(--hover-bg);
+}
+
+.shift-cell div {
+  margin-bottom: 6px;
+}
+
+/* Forms */
+.apply-form input[type="date"] {
+  padding: 6px 8px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  transition: border-color 0.2s ease;
+}
+.apply-form input[type="date"]:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+/* Button Row */
+.button-row {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 24px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .navbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .nav-left,
+  .nav-center,
+  .nav-right {
+    width: 100%;
+    text-align: center;
+  }
+
+  .controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  table {
+    display: block;
+    overflow-x: auto;
+  }
+
+  th,
+  td {
+    white-space: nowrap;
+  }
+
+  h1 {
+    font-size: 1.5rem;
+  }
+
+  .clock-time {
+    font-size: 1rem;
+  }
+
+  .clock-date {
+    font-size: 0.75rem;
+  }
+}

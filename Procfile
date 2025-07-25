@@ -1,1 +1,1 @@
-web: gunicorn STAFF_MAN.app:app
+web: gunicorn app:app

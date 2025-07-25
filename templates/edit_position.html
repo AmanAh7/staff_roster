@@ -2,14 +2,30 @@
 <html>
   <head>
     <title>Edit Position</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='edit_position.css') }}"
+    />
   </head>
   <body>
-    <h2>Edit Position for {{ staff[1] }}</h2>
-    <form method="POST">
-      <label>New Position:</label>
-      <input type="text" name="position" value="{{ staff[2] }}" required />
-      <button type="submit">Update</button>
-    </form>
-    <a href="{{ url_for('dashboard') }}">Back to Dashboard</a>
+    <div class="card-container">
+      <div class="card">
+        <h2>Edit Position for {{ staff[1] }}</h2>
+        <form method="POST">
+          <label for="position">New Position:</label>
+          <input
+            type="text"
+            id="position"
+            name="position"
+            value="{{ staff[2] }}"
+            required
+          />
+          <button type="submit">Update</button>
+        </form>
+        <a class="back-link" href="{{ url_for('dashboard') }}">
+          ← Back to Dashboard
+        </a>
+      </div>
+    </div>
   </body>
 </html>
