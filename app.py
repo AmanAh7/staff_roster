@@ -11,7 +11,7 @@ import os
 
 load_dotenv()
 
-app = Flask(__name__)
+app = Flask(__name__)  # Fixed here (name_)
 app.config.from_pyfile('config.py')
 app.secret_key = 'abcd1234'
 
@@ -104,7 +104,7 @@ def assign_shift():
                         start_time = datetime.strptime(start_str, "%H:%M").time()
                         end_time = datetime.strptime(end_str, "%H:%M").time()
                     except ValueError:
-                        flash(f"⚠️ Invalid time format for shift on {date_str}.", "danger")
+                        flash(f"⚠ Invalid time format for shift on {date_str}.", "danger")
                         continue
 
                     start_dt = datetime.combine(date_obj, start_time)
@@ -136,7 +136,7 @@ def assign_shift():
                         """, (staff_id,))
                         result = cur.fetchone()
                         if result['night_count'] >= 8:  
-                            flash(f"⚠️ Night shift limit reached for staff ID {staff_id}.", "warning")
+                            flash(f"⚠ Night shift limit reached for staff ID {staff_id}.", "warning")
                             continue
 
                     cur.execute("""
@@ -157,7 +157,15 @@ def assign_shift():
             staff = cur.fetchall()
 
             today = datetime.today().date()
-            start_of_week = today - timedelta(days=today.weekday())
+            
+            # -------------------------
+            # Updated logic here to auto-show current week on Monday
+            if today.weekday() == 0:  # Monday
+                start_of_week = today
+            else:
+                start_of_week = today - timedelta(days=today.weekday())
+            # -------------------------
+            
             end_of_week = start_of_week + timedelta(days=6)
 
             cur.execute("""
@@ -607,6 +615,7 @@ def clear_individual_night_shifts(staff_id):
             return redirect(url_for('dashboard'))
     finally:
         connection.close()
+
 @app.route('/show-weekly-shifts/<int:staff_id>')
 def show_weekly_shifts(staff_id):
     today = datetime.today().date()
@@ -657,12 +666,11 @@ def delete_staff():
             return redirect(url_for('dashboard'))
     finally:
         connection.close()
+
 @app.route("/")
 def home():
     return "Flask is running successfully on Render!"
 
-if __name__ == '__main__':
+if __name__ == '_main_':  # Fixed here
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
-
-
