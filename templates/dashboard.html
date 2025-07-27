@@ -7,7 +7,6 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap"
       rel="stylesheet"
     />
-
     <link
       rel="stylesheet"
       href="{{ url_for('static', filename='style.css') }}"
@@ -52,7 +51,7 @@
     <table>
       <thead>
         <tr>
-          <th>Select</th>
+          <th>Delete</th>
           <th>Name</th>
           <th>Position</th>
           <th>Leaves (This Month)</th>
@@ -79,9 +78,9 @@
           </td>
           <td>{{ s.name }}</td>
           <td>{{ s.position }}</td>
-          <td>{{ s.total_leaves }}</td>
+          <td>{{ s.total_leaves or 0 }}</td>
           <td>
-            {{ s.total_night_shifts }}
+            {{ s.total_night_shifts or 0 }}
             <form
               action="{{ url_for('clear_individual_night_shifts', staff_id=s.id) }}"
               method="POST"
@@ -92,14 +91,14 @@
             </form>
           </td>
           <td>
-            {% for shift in shift_data[s.id] %}
+            {% if shift_data[s.id] %} {% for shift in shift_data[s.id] %}
             <div>
-              📅 {{ shift.date }} | ⏰ {{ shift.start_time }} - {{
-              shift.end_time }}
+              📅 {{ shift.date.strftime('%d/%m/%Y') }} | ⏰ {{ shift.start_time
+              }} - {{ shift.end_time }}
             </div>
-            {% else %}
+            {% endfor %} {% else %}
             <i>No Shifts</i>
-            {% endfor %}
+            {% endif %}
             <form
               action="{{ url_for('show_weekly_shifts', staff_id=s.id) }}"
               method="get"
@@ -143,22 +142,25 @@
     <script>
       function updateClock() {
         const now = new Date();
-        const time = now.toLocaleTimeString("en-IN", {
-          hour: "2-digit",
-          minute: "2-digit",
-          second: "2-digit",
-          hour12: true,
-        });
-        const date = now.toLocaleDateString("en-IN", {
-          weekday: "short",
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-        });
-        document.getElementById("clock").textContent = time;
-        document.getElementById("date").textContent = date;
+        document.getElementById("clock").textContent = now.toLocaleTimeString(
+          "en-IN",
+          {
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+            hour12: true,
+          }
+        );
+        document.getElementById("date").textContent = now.toLocaleDateString(
+          "en-IN",
+          {
+            weekday: "short",
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+          }
+        );
       }
-
       setInterval(updateClock, 1000);
       updateClock();
     </script>

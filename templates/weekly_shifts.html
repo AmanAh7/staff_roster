@@ -1,6 +1,8 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link
       rel="stylesheet"
       href="{{ url_for('static', filename='weekly_shifts.css') }}"
@@ -9,13 +11,17 @@
   </head>
   <body>
     <div class="container">
-      <h2>Shifts for {{ staff.name }} ({{ start }} to {{ end }})</h2>
+      <h2>
+        Shifts for {{ staff.name }} ({{ start.strftime('%d/%m/%Y') }} to {{
+        end.strftime('%d/%m/%Y') }})
+      </h2>
+      <p>📅 Today: {{ today.strftime('%d/%m/%Y') }}</p>
 
       {% if shifts %}
       <div class="shift-cards">
         {% for shift in shifts %}
         <div class="shift-card">
-          <div class="shift-date">{{ shift.date }}</div>
+          <div class="shift-date">{{ shift.date.strftime('%d/%m/%Y') }}</div>
           <div class="shift-time">
             ⏰ {{ shift.start_time }} - {{ shift.end_time }}
           </div>
