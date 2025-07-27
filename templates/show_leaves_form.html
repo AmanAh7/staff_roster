@@ -16,9 +16,11 @@
       <select name="staff_id" required>
         <option value="" disabled {% if not selected_staff %}selected{% endif %}>Select staff</option>
         {% for staff in staff_list %}
-        <option value="{{ staff[0] }}" {% if staff[0]|string == selected_staff|string %}selected{% endif %}>
-          {{ staff[1] }}
-        </option>
+        
+        <option value="{{ staff.id }}" {% if staff.id|string == selected_staff|string %}selected{% endif %}>
+  {{ staff.name }}
+</option>
+
         {% endfor %}
       </select>
       <button type="submit">Show Leaves</button>
