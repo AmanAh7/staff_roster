@@ -1,5 +1,6 @@
 from flask import Flask, flash, render_template, request, redirect, url_for, send_file
 import pymysql
+pymysql.install_as_MySQLdb()
 from datetime import datetime, time, timedelta
 from urllib.parse import urlencode
 from openpyxl import Workbook
