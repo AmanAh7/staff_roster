@@ -8,10 +8,13 @@ from io import BytesIO
 from collections import defaultdict
 from dotenv import load_dotenv
 import os
+import pytz
+
+india = pytz.timezone("Asia/Kolkata")
 
 load_dotenv()
 
-app = Flask(__name__)  # Fixed here (name_)
+app = Flask(__name__)  # fix here (name_)
 app.config.from_pyfile('config.py')
 app.secret_key = 'abcd1234'
 
@@ -36,7 +39,6 @@ def is_night_shift(start_time_str: str, end_time_str: str) -> bool:
         st = datetime.strptime(start_time_str, "%H:%M").time()
     return st >= time(17, 0) or st < time(2, 0)
 
-# Helper to convert timedelta to time
 def to_time(val):
     if isinstance(val, time):
         return val
@@ -59,14 +61,16 @@ def check_overlap(staff_id, date, new_start, new_end):
             overlaps = []
             for row in cur.fetchall():
                 os_, oe = row['start_time'], row['end_time']
-                # overlap if not (new_end <= os_ OR new_start >= oe)
                 if not (new_end <= os_ or new_start >= oe):
                     overlaps.append((os_, oe))
             return overlaps
     finally:
         connection.close()
 
-# Routes
+def get_today():
+    # Utility to get today's date in Asia/Kolkata timezone
+    return datetime.now(india).date()
+
 @app.route('/')
 def dashboard():
     connection = get_db_connection()
@@ -74,10 +78,13 @@ def dashboard():
         with connection.cursor() as cur:
             cur.execute("SELECT id, name, position, total_leaves, total_night_shifts FROM staff")
             staff = cur.fetchall()
-            today = datetime.today().date()
+            today = get_today()
             shift_data = {}
             for s in staff:
-                cur.execute("SELECT id, date, start_time, end_time FROM shifts WHERE staff_id=%s AND date=%s ORDER BY start_time", (s["id"], today))
+                cur.execute(
+                    "SELECT id, date, start_time, end_time FROM shifts WHERE staff_id=%s AND date=%s ORDER BY start_time", 
+                    (s["id"], today)
+                )
                 shift_data[s["id"]] = cur.fetchall()
             return render_template('dashboard.html', staff=staff, shift_data=shift_data)
     finally:
@@ -156,26 +163,23 @@ def assign_shift():
             cur.execute("SELECT id, name FROM staff")
             staff = cur.fetchall()
 
-            today = datetime.today().date()
-            
-            # -------------------------
-            # Updated logic here to auto-show current week on Monday
-            if today.weekday() == 0:  # Monday
+            today = get_today()
+
+            # Show the current week starting Monday, automatically including Monday
+            if today.weekday() == 0:
                 start_of_week = today
             else:
                 start_of_week = today - timedelta(days=today.weekday())
-            # -------------------------
-            
             end_of_week = start_of_week + timedelta(days=6)
 
             cur.execute("""
-            SELECT sh.id, sh.staff_id, s.name AS staff_name, s.position,
-                   sh.date, sh.start_time, sh.end_time
-            FROM shifts sh
-            JOIN staff s ON s.id = sh.staff_id
-            WHERE sh.date BETWEEN %s AND %s
-            ORDER BY sh.date, sh.start_time
-        """, (start_of_week, end_of_week))
+                SELECT sh.id, sh.staff_id, s.name AS staff_name, s.position,
+                       sh.date, sh.start_time, sh.end_time
+                FROM shifts sh
+                JOIN staff s ON s.id = sh.staff_id
+                WHERE sh.date BETWEEN %s AND %s
+                ORDER BY sh.date, sh.start_time
+            """, (start_of_week, end_of_week))
 
             weekly_shifts = cur.fetchall()
 
@@ -353,7 +357,6 @@ def delete_shift(shift_id):
     finally:
         connection.close()
 
-#replacement
 @app.route('/replacement')
 def replacement():
     date = request.args.get('date')
@@ -538,11 +541,10 @@ def show_leaves_form():
                 """, (selected_staff,))
                 leave_records = cur.fetchall()
 
-                # Monthly summary
                 summary = defaultdict(int)
                 for record in leave_records:
                     leave_date = record['date']
-                    month_year = leave_date.strftime("%B %Y")  # leave_date is already a date object
+                    month_year = leave_date.strftime("%B %Y")
                     summary[month_year] += 1
                 leave_summary = dict(summary)
 
@@ -559,7 +561,7 @@ def show_leaves_form():
 
 @app.route('/clear-shifts-today', methods=['POST'])
 def clear_shifts_today():
-    today = datetime.today().date()
+    today = get_today()
     connection = get_db_connection()
     try:
         with connection.cursor() as cur:
@@ -618,9 +620,9 @@ def clear_individual_night_shifts(staff_id):
 
 @app.route('/show-weekly-shifts/<int:staff_id>')
 def show_weekly_shifts(staff_id):
-    today = datetime.today().date()
-    start_of_week = today - timedelta(days=today.weekday())  # Always Monday
-    end_of_week = start_of_week + timedelta(days=6)          # Always Sunday
+    today = get_today()
+    start_of_week = today - timedelta(days=today.weekday())  # Monday
+    end_of_week = start_of_week + timedelta(days=6)          # Sunday
 
     connection = get_db_connection()
     try:
@@ -642,7 +644,7 @@ def show_weekly_shifts(staff_id):
                 staff=staff,
                 start=start_of_week,
                 end=end_of_week,
-                today=today  # ✅ Pass today's date to template
+                today=today
             )
     finally:
         connection.close()
@@ -671,6 +673,6 @@ def delete_staff():
 def home():
     return "Flask is running successfully on Render!"
 
-if __name__ == '_main_':  # Fixed here
+if __name__ == '__main__':  # fix here
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
