@@ -607,13 +607,11 @@ def clear_individual_night_shifts(staff_id):
             return redirect(url_for('dashboard'))
     finally:
         connection.close()
-
 @app.route('/show-weekly-shifts/<int:staff_id>')
 def show_weekly_shifts(staff_id):
     today = datetime.today().date()
-    weekday = today.weekday()
-    start_of_week = today if weekday == 0 else today - timedelta(days=weekday)
-    end_of_week = start_of_week + timedelta(days=6)
+    start_of_week = today - timedelta(days=today.weekday())  # Always Monday
+    end_of_week = start_of_week + timedelta(days=6)          # Always Sunday
 
     connection = get_db_connection()
     try:
@@ -629,7 +627,14 @@ def show_weekly_shifts(staff_id):
             cur.execute("SELECT name FROM staff WHERE id = %s", (staff_id,))
             staff = cur.fetchone()
 
-            return render_template('weekly_shifts.html', shifts=shifts, staff=staff, start=start_of_week, end=end_of_week)
+            return render_template(
+                'weekly_shifts.html',
+                shifts=shifts,
+                staff=staff,
+                start=start_of_week,
+                end=end_of_week,
+                today=today  # ✅ Pass today's date to template
+            )
     finally:
         connection.close()
 
