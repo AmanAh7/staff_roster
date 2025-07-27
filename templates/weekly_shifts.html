@@ -1,40 +1,63 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link
-      rel="stylesheet"
-      href="{{ url_for('static', filename='weekly_shifts.css') }}"
-    />
-    <title>{{ staff.name }}'s Weekly Shifts</title>
-  </head>
-  <body>
-    <div class="container">
-      <h2>
-        Shifts for {{ staff.name }} ({{ start.strftime('%d/%m/%Y') }} to {{
-        end.strftime('%d/%m/%Y') }})
-      </h2>
-      <p>📅 Today: {{ today.strftime('%d/%m/%Y') }}</p>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Show Leaves</title>
+  <link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='show_leaves.css') }}"
+  />
+</head>
+<body>
+  <div class="center-container">
+    <h2>📋 Show Staff Leaves</h2>
 
-      {% if shifts %}
-      <div class="shift-cards">
-        {% for shift in shifts %}
-        <div class="shift-card">
-          <div class="shift-date">{{ shift.date.strftime('%d/%m/%Y') }}</div>
-          <div class="shift-time">
-            ⏰ {{ shift.start_time }} - {{ shift.end_time }}
-          </div>
-        </div>
+    <form method="POST">
+      <label>Select Staff:</label>
+      <select name="staff_id" required>
+        <option value="" disabled {% if not selected_staff %}selected{% endif %}>Select staff</option>
+        {% for staff in staff_list %}
+        <option value="{{ staff.id }}" {% if staff.id|string == selected_staff|string %}selected{% endif %}>
+          {{ staff.name }}
+        </option>
         {% endfor %}
-      </div>
-      {% else %}
-      <p class="no-shifts">No shifts assigned for this week.</p>
-      {% endif %}
+      </select>
+      <button type="submit">Show Leaves</button>
+    </form>
 
-      <a href="{{ url_for('dashboard') }}" class="back-link"
-        >← Back to Dashboard</a
-      >
+    {% if staff_name %}
+    <div class="card">
+      <h3>🧑 Leaves for {{ staff_name }}</h3>
+      {% if leave_records %}
+      <ul>
+        {% for leave in leave_records %}
+        <li>{{ leave.date.strftime('%Y-%m-%d') }}</li>
+        {% endfor %}
+      </ul>
     </div>
-  </body>
+
+    <div class="card">
+      <h4>📅 Monthly Summary</h4>
+      <ul>
+        {% for month, count in leave_summary.items() %}
+        <li>{{ month }}: {{ count }} leave{{ "s" if count > 1 else "" }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <form method="POST" action="{{ url_for('export_leaves') }}">
+      <input type="hidden" name="staff_id" value="{{ selected_staff }}">
+      <button type="submit" class="export-btn">⬇️ Export Leaves Excel</button>
+    </form>
+      {% else %}
+        <p>No leaves found.</p>
+      {% endif %}
+    {% endif %}
+  </div>
+
+  <div style="margin-top: 20px;">
+    <a href="{{ url_for('dashboard') }}">← Back to Dashboard</a>
+  </div>
+</body>
 </html>

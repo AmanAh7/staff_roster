@@ -14,7 +14,7 @@
 
       <form
         method="POST"
-        action="{{ url_for('edit_shift', shift_id=shift[0]) }}"
+        action="{{ url_for('edit_shift', shift_id=shift.id) }}"
       >
         <div class="form-group">
           <label>Start Time:</label>
