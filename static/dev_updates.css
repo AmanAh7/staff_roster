@@ -29,12 +29,6 @@ body {
   gap: 36px;
 }
 
-header,
-footer,
-section.updates-section {
-  /* Separation with spacing */
-}
-
 .page-title {
   font-size: 2.4rem;
   font-weight: 700;
