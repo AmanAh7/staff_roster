@@ -174,12 +174,11 @@ def assign_shift():
 
             cur.execute("""
                 SELECT sh.id, sh.staff_id, s.name AS staff_name, s.position,
-                       sh.date, sh.start_time, sh.end_time
+                sh.date, sh.start_time, sh.end_time
                 FROM shifts sh
                 JOIN staff s ON s.id = sh.staff_id
-                WHERE sh.date BETWEEN %s AND %s
                 ORDER BY sh.date, sh.start_time
-            """, (start_of_week, end_of_week))
+                """)
 
             weekly_shifts = cur.fetchall()
 
@@ -187,9 +186,10 @@ def assign_shift():
                 'assign_shift.html',
                 staff=staff,
                 assigned_shifts=weekly_shifts,
-                start_of_week=start_of_week,
-                end_of_week=end_of_week
+                start_of_week=None,
+                end_of_week=None
             )
+
     finally:
         connection.close()
 

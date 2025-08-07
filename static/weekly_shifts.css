@@ -1,110 +1,353 @@
 :root {
-  --primary: #007bff;
-  --text: #212529;
-  --background: #f4f6f9;
-  --card-bg: #fff;
-  --border: #dee2e6;
-  --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  --primary: #5561f0;
+  --secondary: #1f2235;
+  --accent: #5efc82;
+  --text: #23263a;
+  --muted: #7886a0;
+  --background: #f6f7fb;
+  --card: #fff;
+  --border: #e5e9f2;
+  --shadow: 0 8px 20px 0 rgba(85, 97, 240, 0.06);
+}
+
+* {
+  box-sizing: border-box;
 }
 
 body {
-  font-family: "Segoe UI", Tahoma, Verdana, sans-serif;
-  background-color: var(--background);
-  margin: 0;
-  padding: 40px 20px;
+  font-family: "Inter", "Segoe UI", Arial, sans-serif;
+  background: var(--background);
   color: var(--text);
+  margin: 0;
+  padding: 16px;
+  min-height: 100vh;
+  line-height: 1.5;
 }
 
-.container {
-  max-width: 600px;
-  margin: auto;
-  background-color: var(--card-bg);
-  padding: 30px;
-  border-radius: 10px;
+.center-container {
+  background: var(--card);
+  width: 100%;
+  max-width: min(90vw, 560px);
+  margin: 0 auto;
+  padding: clamp(16px, 4vw, 36px);
+  border-radius: 20px;
   box-shadow: var(--shadow);
+  text-align: center;
+  position: relative;
 }
 
 h2 {
-  margin-top: 0;
+  font-size: clamp(1.2rem, 4vw, 2.02rem);
+  font-weight: 700;
+  letter-spacing: -0.001em;
   color: var(--primary);
-  text-align: center;
+  margin: 0 0 8px 0;
+  line-height: 1.2;
 }
 
-/* Updated shift card layout */
-.shift-cards {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  margin-top: 24px;
+.staff-name {
+  color: var(--secondary);
+  font-weight: 700;
+  word-break: break-word;
 }
 
-.shift-card {
-  background-color: var(--card-bg);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  box-shadow: var(--shadow);
-  padding: 16px 20px;
-  transition: transform 0.2s ease, background-color 0.2s;
+.week-range {
+  font-size: clamp(0.9rem, 2.5vw, 1.08rem);
+  color: var(--muted);
+  margin-bottom: 16px;
+  letter-spacing: 0.02em;
 }
 
-.shift-card:hover {
-  transform: translateY(-2px);
-  background-color: #f0f4f8;
+/* === Table Container === */
+.table-wrapper {
+  overflow-x: auto;
+  margin: 20px 0;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
-.shift-date {
-  font-weight: 600;
-  font-size: 1.05rem;
-  color: var(--primary);
-  margin-bottom: 6px;
+/* === Table Styling === */
+.shift-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: clamp(0.85rem, 2vw, 1.05rem);
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  min-width: 400px;
 }
 
-.shift-time {
-  font-family: monospace;
-  font-size: 0.95rem;
-  color: #333;
+.shift-table thead th {
+  background-color: var(--primary);
+  color: white;
+  padding: clamp(12px, 2vw, 16px) clamp(8px, 1.5vw, 12px);
+  font-weight: 700;
+  text-align: center; /* Center align headers */
+  user-select: none;
+  white-space: nowrap;
+  border: none;
 }
 
-.no-shifts {
-  text-align: center;
-  color: #888;
-  margin-top: 20px;
-}
-
-.back-link {
-  display: block;
-  margin-top: 30px;
-  text-align: center;
-  color: var(--primary);
-  text-decoration: none;
+.shift-table tbody td {
+  padding: clamp(12px, 2vw, 16px) clamp(8px, 1.5vw, 12px);
+  border-bottom: 1px solid var(--border);
+  color: var(--secondary);
+  vertical-align: middle;
+  text-align: center; /* Center align all content */
+  word-break: break-word;
+  border-left: none;
+  border-right: none;
   font-weight: 500;
 }
 
-.back-link:hover {
-  text-decoration: underline;
+/* Enhanced card-like rows */
+.shift-table tbody tr {
+  transition: all 0.2s ease;
+  border-radius: 8px;
 }
 
-/* Responsive */
-@media (max-width: 600px) {
+.shift-table tbody tr:nth-child(even) {
+  background-color: #f9fafc;
+}
+
+.shift-table tbody tr:hover {
+  background-color: #eaf2ff;
+  cursor: default;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(85, 97, 240, 0.1);
+}
+
+.shift-table tbody tr:nth-child(odd) {
+  background-color: #ffffff;
+}
+
+.shift-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Individual cell styling for better card appearance */
+.shift-table tbody td:first-child {
+  border-radius: 8px 0 0 8px;
+  font-weight: 600;
+  color: var(--secondary);
+}
+
+.shift-table tbody td:last-child {
+  border-radius: 0 8px 8px 0;
+}
+
+/* Time styling */
+.shift-table tbody td time {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: rgba(85, 97, 240, 0.05);
+  color: var(--primary);
+  font-weight: 600;
+}
+
+/* Date styling */
+.shift-table tbody td:first-child time {
+  background: rgba(94, 252, 130, 0.1);
+  color: var(--secondary);
+  font-weight: 600;
+}
+
+/* No shifts message styling */
+.no-shifts {
+  color: var(--muted);
+  font-size: clamp(1rem, 3vw, 1.15rem);
+  margin: 30px 0 28px 0;
+  padding: clamp(16px, 4vw, 24px) 0 8px;
+  border-radius: 12px;
+  background: #f0f2f870;
+  font-style: italic;
+}
+
+/* Back link styling */
+.back-link {
+  display: inline-block;
+  margin-top: 16px;
+  text-align: center;
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: clamp(0.95rem, 2.5vw, 1.07rem);
+  transition: all 0.22s ease;
+  letter-spacing: 0.01em;
+  padding: 12px 20px;
+  border-radius: 8px;
+  background: rgba(85, 97, 240, 0.05);
+}
+
+.back-link:hover,
+.back-link:focus {
+  color: white;
+  background: var(--primary);
+  text-decoration: none;
+  transform: translateY(-1px);
+}
+
+/* Icon styles */
+.icon {
+  font-size: 1.15em;
+  vertical-align: middle;
+  margin-right: 6px;
+}
+
+/* Enhanced responsive styles */
+@media (max-width: 768px) {
   body {
-    padding: 20px 12px;
+    padding: 12px;
   }
 
-  .container {
-    padding: 20px;
-    box-shadow: none;
+  .center-container {
+    border-radius: 16px;
+    max-width: 100%;
+  }
+
+  .table-wrapper {
+    margin: 16px -8px 0;
+    border-radius: 8px;
+  }
+
+  .shift-table {
+    border-radius: 8px;
+  }
+}
+
+@media (max-width: 520px) {
+  body {
+    padding: 8px;
+  }
+
+  .center-container {
+    border-radius: 12px;
+    padding: clamp(12px, 3vw, 20px);
+  }
+
+  /* Transform table to individual card layout */
+  .table-wrapper {
+    margin: 16px 0;
+  }
+
+  .shift-table {
+    min-width: unset;
     border-radius: 0;
+    box-shadow: none;
+    background: transparent;
   }
 
-  .shift-card {
-    padding: 14px 16px;
+  .shift-table,
+  .shift-table thead,
+  .shift-table tbody,
+  .shift-table th,
+  .shift-table td,
+  .shift-table tr {
+    display: block;
   }
 
-  .shift-date {
+  .shift-table thead tr {
+    position: absolute;
+    top: -9999px;
+    left: -9999px;
+  }
+
+  /* Card format for mobile */
+  .shift-table tr {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    margin-bottom: 16px;
+    padding: 20px;
+    background: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    text-align: center; /* Center everything in cards */
+  }
+
+  .shift-table td {
+    border: none;
+    position: relative;
+    padding: 12px 0;
+    text-align: center; /* Center align mobile cards */
+    margin-bottom: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .shift-table td:last-child {
+    margin-bottom: 0;
+  }
+
+  .shift-table td:before {
+    content: attr(data-label);
+    display: block;
+    font-weight: 700;
+    color: var(--primary);
+    font-size: 0.85em;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  /* Enhanced mobile time styling */
+  .shift-table td time {
+    display: inline-block;
+    padding: 8px 16px;
+    border-radius: 8px;
+    background: rgba(85, 97, 240, 0.1);
+    color: var(--primary);
+    font-weight: 600;
     font-size: 1rem;
   }
 
-  .shift-time {
+  /* Mobile date styling */
+  .shift-table td:first-child time {
+    background: rgba(94, 252, 130, 0.15);
+    color: var(--secondary);
+    font-weight: 700;
+    padding: 10px 20px;
+  }
+}
+
+@media (max-width: 360px) {
+  .center-container {
+    padding: 16px 12px;
+    border-radius: 8px;
+  }
+
+  .shift-table tr {
+    padding: 16px;
+  }
+
+  .shift-table td {
+    padding: 10px 0;
+  }
+
+  .shift-table td time {
+    padding: 6px 12px;
     font-size: 0.9rem;
+  }
+}
+
+/* Print styles */
+@media print {
+  body {
+    background: white;
+    padding: 0;
+  }
+
+  .center-container {
+    box-shadow: none;
+    border: 1px solid #ccc;
+    max-width: 100%;
+  }
+
+  .back-link {
+    display: none;
+  }
+
+  .shift-table tbody td {
+    text-align: center;
   }
 }

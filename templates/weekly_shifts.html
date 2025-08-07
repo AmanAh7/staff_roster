@@ -1,63 +1,79 @@
 <!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Show Leaves</title>
-  <link
-    rel="stylesheet"
-    href="{{ url_for('static', filename='show_leaves.css') }}"
-  />
-</head>
-<body>
-  <div class="center-container">
-    <h2>📋 Show Staff Leaves</h2>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Weekly Shifts - {{ staff.name if staff else 'Staff' }}</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='weekly_shifts.css') }}"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <main class="center-container" role="main" aria-labelledby="page-title">
+      <h2 id="page-title">
+        <span class="icon" aria-hidden="true">🗓</span>
+        Weekly Shifts for
+        <span class="staff-name">{{ staff.name if staff else 'Staff' }}</span>
+      </h2>
+      <p class="week-range" aria-label="Week Range">
+        {{ start.strftime('%d %b %Y') }} &mdash; {{ end.strftime('%d %b %Y') }}
+      </p>
 
-    <form method="POST">
-      <label>Select Staff:</label>
-      <select name="staff_id" required>
-        <option value="" disabled {% if not selected_staff %}selected{% endif %}>Select staff</option>
-        {% for staff in staff_list %}
-        <option value="{{ staff.id }}" {% if staff.id|string == selected_staff|string %}selected{% endif %}>
-          {{ staff.name }}
-        </option>
-        {% endfor %}
-      </select>
-      <button type="submit">Show Leaves</button>
-    </form>
-
-    {% if staff_name %}
-    <div class="card">
-      <h3>🧑 Leaves for {{ staff_name }}</h3>
-      {% if leave_records %}
-      <ul>
-        {% for leave in leave_records %}
-        <li>{{ leave.date.strftime('%Y-%m-%d') }}</li>
-        {% endfor %}
-      </ul>
-    </div>
-
-    <div class="card">
-      <h4>📅 Monthly Summary</h4>
-      <ul>
-        {% for month, count in leave_summary.items() %}
-        <li>{{ month }}: {{ count }} leave{{ "s" if count > 1 else "" }}</li>
-        {% endfor %}
-      </ul>
-    </div>
-
-    <form method="POST" action="{{ url_for('export_leaves') }}">
-      <input type="hidden" name="staff_id" value="{{ selected_staff }}">
-      <button type="submit" class="export-btn">⬇️ Export Leaves Excel</button>
-    </form>
+      {% if shifts %}
+      <section aria-label="Weekly Shifts Table">
+        <div class="table-wrapper">
+          <table role="table" class="shift-table" aria-describedby="shift-desc">
+            <thead>
+              <tr>
+                <th scope="col">Date 📅</th>
+                <th scope="col">Start Time ⏰</th>
+                <th scope="col">End Time ⏰</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for shift in shifts %}
+              <tr>
+                <td data-label="Date">
+                  <time datetime="{{ shift.date.isoformat() }}">
+                    {{ shift.date.strftime('%A, %d %b %Y') }}
+                  </time>
+                </td>
+                <td data-label="Start Time">
+                  <time datetime="{{ shift.start_time }}"
+                    >{{ shift.start_time }}</time
+                  >
+                </td>
+                <td data-label="End Time">
+                  <time datetime="{{ shift.end_time }}"
+                    >{{ shift.end_time }}</time
+                  >
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </section>
       {% else %}
-        <p>No leaves found.</p>
+      <p class="no-shifts" role="alert" aria-live="polite">
+        <span class="icon" aria-hidden="true">🙅‍♂</span>
+        No shifts scheduled this week.
+      </p>
       {% endif %}
-    {% endif %}
-  </div>
 
-  <div style="margin-top: 20px;">
-    <a href="{{ url_for('dashboard') }}">← Back to Dashboard</a>
-  </div>
-</body>
+      <a
+        href="{{ url_for('dashboard') }}"
+        class="back-link"
+        role="link"
+        aria-label="Back to dashboard"
+      >
+        &larr; Back to Dashboard
+      </a>
+    </main>
+  </body>
 </html>

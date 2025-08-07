@@ -55,7 +55,10 @@
     </div>
 
     <div class="card">
-      <h2>Weekly Assigned Shifts ({{ start_of_week }} → {{ end_of_week }})</h2>
+      <h2>
+        Weekly Assigned Shifts {% if start_of_week and end_of_week %} ({{
+        start_of_week }} → {{ end_of_week }}) {% endif %}
+      </h2>
 
       <button
         class="export-btn"
@@ -82,8 +85,9 @@
           <tr>
             <td>{{ shift.staff_name }}</td>
             <td>{{ shift.position }}</td>
-            <td>{{ shift.date }}</td>
-            <td>{{ shift.date.strftime('%A') }}</td>
+            <td class="shift-date">{{ shift.date }}</td>
+            <td class="shift-weekday"></td>
+            <!-- Will be filled by JS -->
             <td>{{ shift.start_time }}</td>
             <td>{{ shift.end_time }}</td>
             <td>
@@ -166,14 +170,14 @@
 
       function showConfirmModal(onConfirm) {
         const modalHTML = `
-      <div class="modal-overlay" id="confirm-modal">
-        <div class="modal">
-          <h3>Delete this shift?</h3>
-          <button class="confirm">Yes, Delete</button>
-          <button class="cancel">Cancel</button>
+        <div class="modal-overlay" id="confirm-modal">
+          <div class="modal">
+            <h3>Delete this shift?</h3>
+            <button class="confirm">Yes, Delete</button>
+            <button class="cancel">Cancel</button>
+          </div>
         </div>
-      </div>
-    `;
+      `;
         document.body.insertAdjacentHTML("beforeend", modalHTML);
 
         const modal = document.getElementById("confirm-modal");
@@ -183,6 +187,30 @@
         };
         modal.querySelector(".cancel").onclick = () => modal.remove();
       }
+
+      // Fill weekday column based on date string
+      document.addEventListener("DOMContentLoaded", () => {
+        const rows = document.querySelectorAll("#shifts-table tbody tr");
+        rows.forEach((row) => {
+          const dateCell = row.querySelector(".shift-date");
+          const weekdayCell = row.querySelector(".shift-weekday");
+          if (dateCell && weekdayCell) {
+            const dateStr = dateCell.textContent.trim();
+            if (dateStr) {
+              const dateObj = new Date(dateStr);
+              if (!isNaN(dateObj)) {
+                const options = { weekday: "long" };
+                weekdayCell.textContent = dateObj.toLocaleDateString(
+                  "en-US",
+                  options
+                );
+              } else {
+                weekdayCell.textContent = "";
+              }
+            }
+          }
+        });
+      });
     </script>
   </body>
 </html>

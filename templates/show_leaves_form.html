@@ -32,7 +32,7 @@
         {% if leave_records %}
           <ul>
             {% for leave in leave_records %}
-              <li>{{ leave[0] }}</li>
+              <li>{{ leave.date.strftime('%d %b %Y') }}</li>
             {% endfor %}
           </ul>
       </div>
