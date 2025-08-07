@@ -142,7 +142,7 @@ def assign_shift():
                             WHERE staff_id = %s AND is_night_shift = 1 AND MONTH(date) = MONTH(CURDATE())
                         """, (staff_id,))
                         result = cur.fetchone()
-                        if result['night_count'] >= 8:  
+                        if result['night_count'] >= 31:  
                             flash(f"⚠ Night shift limit reached for staff ID {staff_id}.", "warning")
                             continue
 
