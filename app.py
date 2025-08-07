@@ -668,6 +668,30 @@ def delete_staff():
             return redirect(url_for('dashboard'))
     finally:
         connection.close()
+        from flask import request
+
+@app.route('/dev-updates', methods=['GET', 'POST'])
+def dev_updates():
+    # Define your updates here (hardcoded for demo)
+    changes_to_be_made = [
+        "Filter system in Assigned shift table, now admin can filter according to day, position, date.",
+        "Filter system in dashboard in respect of position. night shift, leaves",
+        "In add staff page, after adding a new staff it is redirecting to dashboard, it should not redirect to dashboard until and unless admin click on back to dashboard.",
+        "Registration/ Login system"
+    ]
+    fixes_done = [
+        "Show Shifts Button Fixed: Previously, the Show Shifts button in the dashboard was incorrectly redirecting users to the Show Leaves page. This has been corrected to take users to the proper Show Shifts view.",
+        "Shift Display Logic Corrected: The Assigned Shifts table was not correctly displaying shifts that spanned more than seven days. The table now accurately shows all assigned shifts, regardless of the date range.",
+        "General UI Enhancements: We've made several user interface improvements for a better overall experience."
+    ]
+
+    return render_template(
+        'dev_updates.html',
+        changes_to_be_made=changes_to_be_made,
+        fixes_done=fixes_done,
+       
+    )
+
 
 @app.route("/")
 def home():

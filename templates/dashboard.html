@@ -23,6 +23,10 @@
         <a href="/show-leaves-form"
           ><button class="btn">📋 Show Leaves</button></a
         >
+        <a href="{{ url_for('dev_updates') }}">
+          <button class="btn">Dev updates</button>
+        </a>
+
         <form action="/clear-shifts-today" method="POST" class="inline-form">
           <button type="submit" class="btn danger">
             🧹 Clear Today’s Shifts
